@@ -24,10 +24,9 @@ def load_model(saved_dir: str=LOCAL_DIR):
             f"No local weights found at {saved_dir}. Run download_model() first"
         )
     model = AutoModelForCausalLM.from_pretrained(saved_dir)
-    tokenizer = AutoTokenizer(saved_dir)
+    tokenizer = AutoTokenizer.from_pretrained(saved_dir)
 
     return model, tokenizer
-
 
 
 if __name__ == "__main__":

@@ -6,5 +6,8 @@ dist/
 wheels/
 *.egg-info
 
+# Model
+weights/
+
 # Virtual environments
 .venv

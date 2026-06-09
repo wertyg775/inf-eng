@@ -1,11 +1,13 @@
 from pathlib import Path
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-if Path.cwd().parent == "proj1":
+'''
+if Path.cwd().parent.name == "proj1":
     root_dir = Path.cwd().parent
 else:
     root_dir = Path.cwd()
-
+'''
+root_dir = Path(__file__).resolve().parent
 LOCAL_DIR = root_dir / "weights" / "qwen2.5-1.5B"
 MODEL_NAME = "Qwen/Qwen2.5-1.5B"
 

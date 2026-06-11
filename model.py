@@ -38,7 +38,8 @@ def tokenize_text(model, tokenizer, text):
 def generate_with_cache(model, tokenizer, input_ids, attention_mask, past_key_values=None, max_new_tokens=128):
 
     new_tokens = []
-
+    
+    #forward pass -> only computes whole key value in first iter
     for _ in range(max_new_tokens):
         outputs = model(
             input_ids=input_ids,
@@ -47,10 +48,10 @@ def generate_with_cache(model, tokenizer, input_ids, attention_mask, past_key_va
             use_cache=True
         )
 
-        logits = outputs.logits[:, -1, :]
-        next_token = torch.argmax(logits, dim=1, keepdim=True)
+        logits = outputs.logits[:, -1, :] #each dimension across seq_length produces logits, get the last one
+        next_token = torch.argmax(logits, dim=1, keepdim=True) #generate token based on that logits
 
-        past_key_values = outputs.past_key_values
+        past_key_values = outputs.past_key_values # save computed kv from outputs
         new_tokens.append(next_token)
 
         if next_token.item() == tokenizer.eos_token_id:

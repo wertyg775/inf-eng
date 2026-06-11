@@ -31,14 +31,13 @@ def load_model(saved_dir: str=LOCAL_DIR):
 
     return model, tokenizer
 
-@torch.inference_mode()
-def generate_with_cache(model, tokenizer, prompt, max_new_tokens=128):
-    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-    input_ids = inputs["input_ids"]
-    attention_mask = inputs["attention_mask"]
+def tokenize_text(model, tokenizer, text):
+    return tokenizer(text, return_tensors="pt").to(model.device)
 
-    generated = input_ids
-    past_key_values=None
+@torch.inference_mode()
+def generate_with_cache(model, tokenizer, input_ids, attention_mask, past_key_values=None, max_new_tokens=128):
+
+    new_tokens = []
 
     for _ in range(max_new_tokens):
         outputs = model(
@@ -52,7 +51,7 @@ def generate_with_cache(model, tokenizer, prompt, max_new_tokens=128):
         next_token = torch.argmax(logits, dim=1, keepdim=True)
 
         past_key_values = outputs.past_key_values
-        generated = torch.cat((generated, next_token), dim=1)
+        new_tokens.append(next_token)
 
         if next_token.item() == tokenizer.eos_token_id:
             break
@@ -70,8 +69,14 @@ def generate_with_cache(model, tokenizer, prompt, max_new_tokens=128):
             dim=1,
         )
 
-    new_tokens = generated[:, inputs["input_ids"].shape[1]:]
-    return tokenizer.decode(new_tokens[0], skip_special_tokens=True)
+    generated_ids = torch.cat(new_tokens, dim=1)
+
+    return {
+        "text": tokenizer.decode(generated_ids[0], skip_special_tokens=True),
+        "generated_ids": generated_ids,
+        "attention_mask": attention_mask,
+        "past_key_values": past_key_values
+    }
         
 
 
